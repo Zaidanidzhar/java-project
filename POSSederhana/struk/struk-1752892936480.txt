@@ -1,0 +1,14 @@
+===== STRUK PEMBELIAN =====
+Tanggal: Sat Jul 19 09:42:12 WIB 2025
+
+Nama                 Harga      Jumlah     Subtotal  
+-----------------------------------------------------
+Teh Botol            4000       2          8000      
+Roti Bakar           5000       3          15000     
+Kopi Hitam           3000       1          3000      
+
+Total    : Rp. 26000.0
+Bayar    : Rp. 30000
+Kembali  : Rp. 4000.0
+==============================
+
