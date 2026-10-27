@@ -1,163 +1,104 @@
-# Customer Segmentation: RFM & K-Means
+# POS Sederhana (Kasir Mini)
 
-Aplikasi web untuk segmentasi pelanggan berdasarkan analisis **RFM (Recency, Frequency, Monetary)** dan algoritma **K-Means Clustering**. Admin mengunggah data transaksi, sistem menghitung skor RFM, mengelompokkan pelanggan ke dalam segmen, lalu hasilnya ditampilkan di dashboard.
+Aplikasi kasir berbasis **Java** untuk membantu UMKM atau toko kecil mengelola penjualan. Dibuat dengan **NetBeans IDE** dan basis data **MySQL**. Proyek ini dikerjakan untuk mata kuliah **Pemrograman Berorientasi Objek (PBO)**.
 
-> Dikembangkan sebagai proyek skripsi, menggunakan data transaksi penjualan toko online (Visscotton, periode Mei 2025 - Juni 2026).
-
-<!-- TODO: tambahkan screenshot dashboard di sini -->
-<!-- ![Dashboard](docs/dashboard.png) -->
-
-## Latar Belakang
-
-Pelaku usaha kecil biasanya punya data transaksi, tetapi belum memanfaatkannya untuk mengenali pelanggan. Project ini mengelompokkan pelanggan berdasarkan perilaku belinya sehingga strategi promosi bisa dibedakan per segmen, misalnya mempertahankan pelanggan terbaik dan menghubungi kembali pelanggan yang mulai menjauh.
+<!-- TODO: tambahkan screenshot (login, transaksi, struk, laporan) di folder docs/ -->
+<!-- ![Halaman Transaksi](docs/transaksi.png) -->
 
 ## Fitur
 
-- Login admin (Laravel Breeze) dengan proteksi middleware role admin
-- Unggah dataset transaksi (CSV/XLSX/XLS, maksimal 10 MB)
-- Perhitungan metrik RFM per periode bulanan
-- Eksperimen jumlah klaster (K = 2 sampai 10) dengan Elbow Method, Silhouette Score, dan Davies-Bouldin Index
-- Segmentasi pelanggan dengan K-Means, hasilnya diberi label segmen
-- Dashboard hasil: profil tiap segmen, metrik evaluasi model, dan visualisasi klaster
-- Halaman publik (landing page) yang menampilkan ringkasan hasil
+**Login multi-role**
+- **Admin**: mengelola produk, melihat laporan penjualan, dan melakukan transaksi
+- **Kasir (user)**: melakukan penjualan dan mencetak struk
 
-## Hasil Segmentasi
+**Manajemen produk**
+- Tambah, ubah, dan hapus data produk
+- Menyimpan harga dan stok barang
 
-Dari data uji, pelanggan terbagi ke dalam 4 segmen:
+**Transaksi penjualan**
+- Menambahkan barang ke keranjang
+- Total harga dihitung otomatis
+- Data penjualan disimpan ke database
 
-| Segmen | Jumlah Pelanggan | Rata-rata Recency (hari) | Rata-rata Frequency | Rata-rata Monetary (Rp) |
-|---|---:|---:|---:|---:|
-| Champions | 120 | 68 | 7,09 | 2.996.633 |
-| Loyal Customers | 1.425 | 74 | 1,19 | 215.848 |
-| At Risk | 1.040 | 249 | 1,11 | 173.931 |
-| Hibernating/Churn | 33 | 154 | 1,00 | 0 |
+**Cetak struk**
+- Struk dibuat otomatis setelah transaksi selesai
+- Hasilnya disimpan di folder `struk/`
 
-<!-- TODO: ganti angka evaluasi di bawah dengan satu sumber yang konsisten (lihat catatan di bawah) -->
-Evaluasi model: K = 4 dipilih berdasarkan Elbow Method, dengan Silhouette Score dan Davies-Bouldin Index yang dilaporkan di dashboard.
+**Laporan penjualan**
+- Menampilkan data transaksi yang sudah dilakukan
+- Memudahkan pemilik toko memantau penjualan harian
 
-## Arsitektur
+## Konsep OOP yang Digunakan
 
-```
-Admin (browser)
-      |
-      v
-Laravel 12 (rfm-segmentation)  --HTTP-->  FastAPI (fastapi-service)
-  - autentikasi, upload data                - hitung RFM
-  - dashboard, penyimpanan hasil            - K-Means (scikit-learn)
-      |                                     - metrik evaluasi
-      v
- Database (SQLite / MySQL)
-```
-
-Laravel menangani antarmuka dan data, sedangkan proses machine learning dipisahkan ke layanan FastAPI agar bisa dikembangkan dan di-deploy sendiri.
+<!-- TODO: isi sesuai kode, contoh di bawah hanya kerangka. Hapus yang tidak dipakai. -->
+- Class dan object (misalnya `Produk`, `Transaksi`, `User`)
+- Enkapsulasi (atribut private dengan getter/setter)
+- Pewarisan dan polimorfisme (jika dipakai, sebutkan class-nya)
+- Koneksi database dengan JDBC
 
 ## Tech Stack
 
 | Bagian | Teknologi |
 |---|---|
-| Web app | Laravel 12, PHP 8.2+, Laravel Breeze, Blade, Tailwind CSS, Alpine.js, Vite |
-| ML service | Python, FastAPI, scikit-learn 1.6, pandas, NumPy, joblib |
-| Database | SQLite (default), dapat diganti ke MySQL |
-| Import data | PhpSpreadsheet |
-| Testing | PHPUnit (Feature dan Unit test) |
+| Bahasa | Java <!-- TODO: versi JDK --> |
+| IDE / build | NetBeans, Apache Ant (`build.xml`) |
+| Database | MySQL |
+| Antarmuka | <!-- TODO: Java Swing / JavaFX --> |
+| Library | <!-- TODO: sebutkan isi folder lib/, mis. MySQL Connector/J --> |
 
 ## Struktur Folder
 
 ```
 .
-├── rfm-segmentation/        # Aplikasi web Laravel
-│   ├── app/
-│   │   ├── Http/Controllers/Admin/   # Dashboard, Upload, ClusterProcess
-│   │   ├── Services/                 # RFM, import dataset, prediksi klaster
-│   │   ├── Repositories/             # Pola repository (Eloquent)
-│   │   └── Models/                   # Customer, Transaction, CustomerSegment, dll
-│   ├── database/migrations/
-│   ├── resources/views/              # admin, auth, landing
-│   ├── routes/
-│   └── tests/
-├── fastapi-service/         # API machine learning
-│   ├── app/
-│   │   ├── main.py                   # Endpoint FastAPI
-│   │   ├── ml/predictor.py           # Logika K-Means
-│   │   ├── services/rfm_service.py   # Perhitungan RFM
-│   │   ├── schemas.py                # Skema request/response
-│   │   └── models/                   # Model terlatih dan hasil evaluasi
-│   └── requirements.txt
-├── data/                    # Dataset contoh
-└── docs/                    # Dokumentasi
+├── src/kasirmini/   # Source code aplikasi
+├── lib/             # Library eksternal (.jar)
+├── struk/           # Hasil cetak struk transaksi
+├── nbproject/       # Konfigurasi project NetBeans
+├── build.xml        # Script build (Ant)
+├── manifest.mf
+└── README.md
 ```
 
-## Endpoint FastAPI
+## Database
 
-| Method | Path | Fungsi |
-|---|---|---|
-| GET | `/` | Info layanan |
-| GET | `/health` | Cek status layanan |
-| GET | `/model-metrics` | Metrik evaluasi model |
-| POST | `/generate-rfm` | Hitung RFM dari data transaksi |
-| POST | `/experiment-kmeans` | Uji beberapa nilai K |
-| POST | `/predict-cluster` | Prediksi segmen pelanggan |
+<!-- TODO: lampirkan file .sql (struktur tabel) di folder database/ lalu tautkan di sini -->
+Tabel utama (sesuaikan dengan skema yang sebenarnya):
 
-Dokumentasi interaktif otomatis tersedia di `http://127.0.0.1:8001/docs` setelah layanan berjalan.
+| Tabel | Isi |
+|---|---|
+| `users` | Akun login dan role (admin / kasir) |
+| `produk` | Nama, harga, dan stok barang |
+| `transaksi` | Data penjualan |
+| `detail_transaksi` | Item pada tiap transaksi |
 
 ## Cara Menjalankan
 
 ### Prasyarat
+- JDK <!-- TODO: versi -->
+- NetBeans IDE
+- MySQL Server (XAMPP juga bisa)
 
-- PHP 8.2+ dan Composer
-- Node.js dan npm
-- Python 3.11+
+### Langkah
+1. Clone repository ini
+   ```bash
+   git clone https://github.com/Zaidanidzhar/java-project.git
+   ```
+2. Buat database di MySQL lalu impor file SQL
+   <!-- TODO: nama database dan nama file .sql -->
+3. Sesuaikan konfigurasi koneksi database (host, nama database, user, password) di source code
+   <!-- TODO: sebutkan nama class/file koneksi -->
+4. Buka project di NetBeans: **File > Open Project**, pilih folder hasil clone
+5. Pastikan library di folder `lib/` sudah terdaftar, lalu jalankan dengan **Run Project (F6)**
 
-### 1. Jalankan layanan FastAPI
+### Akun awal
+<!-- TODO: isi akun demo, misalnya admin / kasir. Jangan pakai kata sandi yang dipakai di tempat lain. -->
 
-```bash
-cd fastapi-service
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --port 8001 --reload
-```
+## Pengembangan Selanjutnya
 
-### 2. Jalankan aplikasi Laravel
-
-```bash
-cd rfm-segmentation
-composer install
-cp .env.example .env
-php artisan key:generate
-touch database/database.sqlite   # Windows: type nul > database\database.sqlite
-php artisan migrate --seed
-npm install && npm run build
-php artisan serve
-```
-
-Pastikan `.env` berisi alamat layanan FastAPI:
-
-```env
-FASTAPI_BASE_URL=http://127.0.0.1:8001
-FASTAPI_TIMEOUT=30
-```
-
-Aplikasi bisa dibuka di `http://127.0.0.1:8000`. Seeder membuat akun admin awal; ganti kata sandinya segera setelah login pertama.
-
-### 3. Alur penggunaan
-
-1. Login sebagai admin
-2. Buka menu **Upload**, unggah file transaksi (kolom: nomor pesanan, username pembeli, waktu pesanan selesai, total pembayaran)
-3. Buka menu **Process**, jalankan eksperimen K lalu proses klaster
-4. Lihat hasilnya di **Dashboard**
-
-## Menjalankan Test
-
-```bash
-cd rfm-segmentation
-php artisan test
-```
-
-## Catatan Pengembangan
-
-- Dataset berisi username pembeli dari marketplace. Untuk repo publik, sebaiknya anonimkan atau ganti dengan data sintetis.
-- Status: <!-- TODO: isi "Selesai" atau sebutkan fitur yang belum rampung -->
+- Validasi input dan penanganan error yang lebih lengkap
+- Pencarian dan filter produk
+- Ekspor laporan ke PDF atau Excel
+- Enkripsi (hash) kata sandi pengguna
 
 ## Author
 
